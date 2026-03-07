@@ -11,6 +11,7 @@ import socket
 import threading
 import logging
 import sys
+import sqlite3
 
 # ─── Configuración de logging ────────────────────────────────────────────────
 logging.basicConfig(
@@ -65,6 +66,46 @@ def send_private(sender: str, target: str, msg: str) -> None:
         if sender_sock:
             send_msg(sender_sock, f"[SERVIDOR] Usuario '{target}' no encontrado.")
 
+#guardar usuario en la bd
+def guardar_usuario(username):
+    conn = sqlite3.connect("chat.db")
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "INSERT OR IGNORE INTO usuarios (username) VALUES (?)",
+        (username,)
+    )
+
+    conn.commit()
+    conn.close()
+
+#guardar mensaje en la bd
+def guardar_mensaje(username, mensaje):
+    conn = sqlite3.connect("chat.db")
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "INSERT INTO mensajes (username, mensaje) VALUES (?, ?)",
+        (username, mensaje)
+    )
+
+    conn.commit()
+    conn.close()
+
+#historial de mensajes
+def obtener_historial(limite=10):
+    conn = sqlite3.connect("chat.db")
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "SELECT username, mensaje, fecha FROM mensajes ORDER BY id DESC LIMIT ?",
+        (limite,)
+    )
+
+    mensajes = cursor.fetchall()
+    conn.close()
+
+    return mensajes[::-1]
 
 # ─── Manejo de un cliente ─────────────────────────────────────────────────────
 
@@ -99,9 +140,10 @@ def handle_client(sock: socket.socket, addr: tuple) -> None:
                 sock.close()
                 return
             clients[username] = sock
+            guardar_usuario(username)
 
         logging.info("✔ %s conectado desde %s:%s", username, *addr)
-        send_msg(sock, f"[SERVIDOR] Hola {username}! Usa @usuario para mensajes privados, /list para ver usuarios, /quit para salir.")
+        send_msg(sock, f"[SERVIDOR] Hola {username}! Usa @usuario para mensajes privados, /list para ver usuarios, /historial para ver el historial, /quit para salir.")
         broadcast(f"[SERVIDOR] {username} se unió al chat.", exclude=username)
 
         # ── Bucle de recepción de mensajes ────────────────────────────────────
@@ -126,6 +168,13 @@ def handle_client(sock: socket.socket, addr: tuple) -> None:
                 with clients_lock:
                     user_list = ", ".join(clients.keys())
                 send_msg(sock, f"[SERVIDOR] Usuarios conectados: {user_list}")
+            
+            #comando ver historial
+            elif msg == "/historial":
+                mensajes = obtener_historial()
+                for user, mensaje, fecha in mensajes:
+                    send_msg(sock, f"{fecha} {user}: {mensaje}")
+                
 
             # Mensaje privado: @destinatario texto
             elif msg.startswith("@"):
@@ -136,8 +185,9 @@ def handle_client(sock: socket.socket, addr: tuple) -> None:
                 else:
                     send_msg(sock, "[SERVIDOR] Formato: @usuario mensaje")
 
-            # Broadcast normal
+            #guardar mensajes cuandos e escriben en el chat
             else:
+                guardar_mensaje(username, msg)
                 broadcast(f"{username}: {msg}", exclude=username)
 
     except ConnectionResetError:
