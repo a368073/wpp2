@@ -12,7 +12,7 @@ import threading
 import sys
 
 # ─── Constantes ──────────────────────────────────────────────────────────────
-HOST = "127.0.0.1"
+HOST = "192.168.1.79"
 PORT = 9999
 BUFFER = 4096
 ENCODING = "utf-8"
