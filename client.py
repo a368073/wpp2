@@ -12,13 +12,13 @@ import threading
 import sys
 
 # ─── Constantes ──────────────────────────────────────────────────────────────
-HOST = "192.168.1.79"
+HOST = "192.168.1.70"
 PORT = 9999
 BUFFER = 4096
 ENCODING = "utf-8"
 
 
-# ─── Evento de parada compartido ─────────────────────────────────────────────
+# ─── Evento de pparada compartido ─────────────────────────────────────────────
 stop_event = threading.Event()
 
 

@@ -33,16 +33,16 @@ const ChatWindow = ({ messages, onSendMessage }) => {
       {/* Header */}
       <div className="h-24 border-b-2 border-black flex items-center justify-between px-8 bg-white z-10 sticky top-0 flex-shrink-0">
         <div>
-          <h2 className="text-black font-black text-3xl uppercase tracking-tighter">Global Lounge</h2>
-          <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mt-1">Public TCP Channel</p>
+          <h2 className="text-black font-black text-3xl uppercase tracking-tighter">WHATSAPP 2</h2>
+          <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mt-1">Chat Global</p>
         </div>
       </div>
 
       {/* Message List */}
       <div className="flex-1 overflow-y-auto p-8 scroll-smooth bg-white space-y-6 flex flex-col">
         <div className="mb-4 border-l-4 border-black pl-4 flex-shrink-0">
-           <h3 className="text-xl font-bold text-black uppercase tracking-tighter">Welcome to the TCP Chat</h3>
-           <p className="text-sm text-gray-600 font-medium mt-1">Connected to raw Python Socket server via Node Proxy.</p>
+           <h3 className="text-xl font-bold text-black uppercase tracking-tighter">Bienvenidos al chat global de whatsapp 2</h3>
+           <p className="text-sm text-gray-600 font-medium mt-1">by ComidoDevs</p>
         </div>
 
         {messages.length === 0 && (
