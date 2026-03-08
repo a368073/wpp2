@@ -207,9 +207,32 @@ def _disconnect(username: str | None, sock: socket.socket) -> None:
         broadcast(f"[SERVIDOR] {username} salió del chat.")
 
 
+# ─── Inicialización de Base de Datos ─────────────────────────────────────────────────────────
+
+def init_db():
+    conn = sqlite3.connect("chat.db")
+    cursor = conn.cursor()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS usuarios (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE
+        )
+    ''')
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS mensajes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT,
+            mensaje TEXT,
+            fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+    conn.commit()
+    conn.close()
+
 # ─── Punto de entrada ─────────────────────────────────────────────────────────
 
 def main() -> None:
+    init_db()
     server_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
