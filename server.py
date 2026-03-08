@@ -6,7 +6,6 @@ Arquitectura:
   - Hilo por cliente   → maneja cada cliente de forma independiente
   - Lock global        → protege el diccionario compartido de clientes
 """
-
 import socket
 import threading
 import logging
