@@ -1,10 +1,9 @@
 """
 server.py — Servidor de Chat TCP con Hilos
-==========================================
 Arquitectura:
-  - Hilo principal     → acepta conexiones entrantes (accept loop)
-  - Hilo por cliente   → maneja cada cliente de forma independiente
-  - Lock global        → protege el diccionario compartido de clientes
+  - Hilo principal:   acepta conexiones entrantes (accept loop)
+  - Hilo por cliente: maneja cada cliente de forma independiente
+  - Lock global:      protege el diccionario compartido de clientes
 """
 import socket
 import threading
@@ -12,27 +11,26 @@ import logging
 import sys
 import sqlite3
 
-# ─── Configuración de logging ────────────────────────────────────────────────
+# Configuración de logging
 logging.basicConfig(
     level=logging.INFO,
     format="[%(asctime)s] %(levelname)s %(message)s",
     datefmt="%H:%M:%S",
 )
 
-# ─── Constantes ──────────────────────────────────────────────────────────────
+# Constantes
 HOST = "0.0.0.0"   # Escuchar en todas las interfaces
 PORT = 9999
 BUFFER = 4096
 ENCODING = "utf-8"
 
 
-# ─── Estado compartido (protegido por lock) ───────────────────────────────────
+# Estado compartido (protegido por lock)
 clients: dict[str, socket.socket] = {}   # {username: socket}
 clients_lock = threading.Lock()
 
 
-# ─── Utilidades de envío ──────────────────────────────────────────────────────
-
+# Utilidades de envío
 def send_msg(sock: socket.socket, msg: str) -> bool:
     """Envía un mensaje a un socket. Devuelve False si falla."""
     try:
@@ -106,7 +104,7 @@ def obtener_historial(limite=10):
 
     return mensajes[::-1]
 
-# ─── Manejo de un cliente ─────────────────────────────────────────────────────
+# Manejo de un cliente
 
 def handle_client(sock: socket.socket, addr: tuple) -> None:
     """
@@ -123,7 +121,7 @@ def handle_client(sock: socket.socket, addr: tuple) -> None:
     """
     username = None
     try:
-        # ── Handshake: registro de usuario ───────────────────────────────────
+        # Handshake: registro de usuario
         send_msg(sock, "[SERVIDOR] Bienvenido. Ingresa tu nombre de usuario:")
 
         raw = sock.recv(BUFFER)
@@ -145,7 +143,7 @@ def handle_client(sock: socket.socket, addr: tuple) -> None:
         send_msg(sock, f"[SERVIDOR] Hola {username}! Usa @usuario para mensajes privados, /list para ver usuarios, /historial para ver el historial, /quit para salir.")
         broadcast(f"[SERVIDOR] {username} se unió al chat.", exclude=username)
 
-        # ── Bucle de recepción de mensajes ────────────────────────────────────
+        # Bucle de recepción de mensajes
         while True:
             raw = sock.recv(BUFFER)
             if not raw:
@@ -207,7 +205,7 @@ def _disconnect(username: str | None, sock: socket.socket) -> None:
         broadcast(f"[SERVIDOR] {username} salió del chat.")
 
 
-# ─── Inicialización de Base de Datos ─────────────────────────────────────────────────────────
+# Inicialización de Base de Datos
 
 def init_db():
     conn = sqlite3.connect("chat.db")
@@ -229,8 +227,7 @@ def init_db():
     conn.commit()
     conn.close()
 
-# ─── Punto de entrada ─────────────────────────────────────────────────────────
-
+# Punto de entrada
 def main() -> None:
     init_db()
     server_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
