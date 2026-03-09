@@ -1,29 +1,27 @@
 """
 client.py — Cliente de Chat TCP con Hilos
-==========================================
 Arquitectura:
-  - Hilo principal     → lectura de teclado (envío de mensajes)
-  - Hilo receptor      → recibe mensajes del servidor en background
-  - stop_event         → señal de parada compartida entre ambos hilos
+  - Hilo principal: lectura de teclado (envío de mensajes)
+  - Hilo receptor:  recibe mensajes del servidor en background
+  - stop_event:     señal de parada compartida entre ambos hilos
 """
 
 import socket
 import threading
 import sys
 
-# ─── Constantes ──────────────────────────────────────────────────────────────
+# Constantes
 HOST = "192.168.1.70"
 PORT = 9999
 BUFFER = 4096
 ENCODING = "utf-8"
 
 
-# ─── Evento de pparada compartido ─────────────────────────────────────────────
+# Evento de parada compartido
 stop_event = threading.Event()
 
 
-# ─── Hilo receptor ───────────────────────────────────────────────────────────
-
+# Hilo receptor
 def receive_messages(sock: socket.socket) -> None:
     """
     Corre en su propio hilo.
@@ -55,14 +53,13 @@ def receive_messages(sock: socket.socket) -> None:
             break
 
 
-# ─── Punto de entrada ─────────────────────────────────────────────────────────
-
+# Punto de entrada
 def main() -> None:
-    # ── Argumentos opcionales: python client.py <host> <port> ────────────────
+    # Argumentos opcionales: python client.py <host> <port>
     host = sys.argv[1] if len(sys.argv) > 1 else HOST
     port = int(sys.argv[2]) if len(sys.argv) > 2 else PORT
 
-    # ── Crear y conectar el socket TCP ───────────────────────────────────────
+    # Crear y conectar el socket TCP
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
         sock.connect((host, port))
@@ -73,7 +70,7 @@ def main() -> None:
     print(f"[✔] Conectado al servidor {host}:{port}")
     print("    Comandos: @usuario <msg> para privado | /list | /quit\n")
 
-    # ── Iniciar hilo receptor ─────────────────────────────────────────────────
+    # Iniciar hilo receptor
     recv_thread = threading.Thread(
         target=receive_messages,
         args=(sock,),
@@ -82,7 +79,7 @@ def main() -> None:
     )
     recv_thread.start()
 
-    # ── Bucle de envío (hilo principal) ──────────────────────────────────────
+    # Bucle de envío (hilo principal)
     try:
         while not stop_event.is_set():
             try:
