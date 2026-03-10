@@ -15,7 +15,7 @@ function App() {
     if (!username.trim()) return;
 
     // Connect to the Node.js Proxy on your local laptop cambiar por la direccion ip del lugar 
-    const proxyUrl = `http://192.168.1.79:3001`;
+    const proxyUrl = `http://localhost:3001`;
     const newSocket = io(proxyUrl);
     setSocket(newSocket);
 
